@@ -25,7 +25,8 @@ HOMEWORK_VERDICTS = {
     'reviewing': 'Работа взята на проверку ревьюером.',
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def check_tokens():
@@ -44,7 +45,8 @@ def send_message(bot, message):
     except ex.SendMessageError as error:
         logging.info(f'Сбой при отправке сообщения: {error}')
     except Exception as e:
-        logging.error(f'Произошла ошибка при отправке сообщения в Telegram: {e}')
+        logging.error(f'Произошла ошибка при отправке сообщения в Telegram:'
+                      f'{e}')
 
 
 def get_api_answer(timestamp):
