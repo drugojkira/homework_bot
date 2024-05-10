@@ -89,8 +89,8 @@ def get_api_answer(timestamp):
     try:
         json_response = response.json()
         if 'code' in json_response or 'error' in json_response:
-            error_message = (json_response.get('error') or
-                             json_response.get('code'))
+            error_message = json_response.get('error') or json_response.get
+            ('code')
             raise ex.EndpointAccessError('Произошла ошибка'
                                          f'при запросе к {ENDPOINT}:'
                                          f'{error_message}')
