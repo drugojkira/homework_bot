@@ -89,7 +89,8 @@ def get_api_answer(timestamp):
     try:
         json_response = response.json()
         if 'code' in json_response or 'error' in json_response:
-            error_message = json_response.get('error') or json_response.get('code')
+            error_message = (json_response.get('error') or
+                             json_response.get('code'))
             raise ex.EndpointAccessError('Произошла ошибка'
                                          f'при запросе к {ENDPOINT}:'
                                          f'{error_message}')
@@ -100,8 +101,8 @@ def get_api_answer(timestamp):
         )
 
 
-def check_response(response): 
-    """Возвращает список домашних работ.""" 
+def check_response(response):
+    """Возвращает список домашних работ."""
     if not isinstance(response, dict):
         raise TypeError('Ответ API должен быть представлен в виде словаря')
 
@@ -136,7 +137,7 @@ def main():
         logging.critical('Отсутствуют обязательные переменные окружения.'
                          'Программа продолжает работу.')
         return
-    
+
     last_homework_time = None
     last_message_cache = ''
     bot = TeleBot(token=TELEGRAM_TOKEN)
@@ -145,23 +146,23 @@ def main():
         try:
             response = get_api_answer(last_homework_time)
             homeworks = check_response(response)
-            
+
             if homeworks:
                 latest_homework = homeworks[-1]
                 message = parse_status(latest_homework)
                 if message:
                     send_message(bot, message)
                     last_homework_time = latest_homework['status_updated']
-            
+
             time.sleep(RETRY_PERIOD)
-            
+
         except Exception as error:
             message = f'Произошла ошибка: {error}'
             logging.error(message)
             if message != last_message_cache:
                 send_message(bot, message)
                 last_message_cache = message
-            
+
             time.sleep(RETRY_PERIOD)
 
 
