@@ -14,7 +14,7 @@ class TelegramError(ApiException):
         return f'{type(self).__name__} --> {self.message}'
 
 
-class CustomSystemExit(Exception):
+class SystemExit(Exception):
     """Переопределяем __str__ метод SystemExit."""
 
     def __init__(self, message):
