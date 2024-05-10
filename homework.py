@@ -31,6 +31,7 @@ LOG_FILE = os.path.join(os.path.dirname(__file__), 'logfile.log')
 
 
 def setup_logger():
+    """Установка логгера."""
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
@@ -43,6 +44,7 @@ def setup_logger():
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+
 
 if __name__ == "__main__":
     setup_logger()
@@ -66,10 +68,11 @@ def send_message(bot, message):
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logging.info('Сообщение отправлено: {}'.format(message))
-        logging.debug('Сообщение успешно отправлено в Telegram: {}'.format(message))
+        logging.debug('Сообщение успешно отправлено в Telegram: {}'
+                      .format(message))
     except Exception as e:
-        logging.error('Произошла ошибка при отправке сообщения в Telegram: {}'
-                      .format(e), exc_info=True)
+        logging.error('Произошла ошибка при отправке'
+                      'сообщения в Telegram: {}'.format(e), exc_info=True)
 
 
 def get_api_answer(timestamp):
@@ -78,7 +81,8 @@ def get_api_answer(timestamp):
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
     except requests.exceptions.RequestException as error:
-        raise ex.SystemExit(f'{ENDPOINT} с параметрами {params} не доступен: {error}')
+        raise ex.SystemExit(f'{ENDPOINT} с параметрами {params}'
+                            f'не доступен: {error}')
     if response.status_code != HTTPStatus.OK:
         raise ex.EndpointAccessError(f'Проблема с доступом к {ENDPOINT}. '
                                      f'Код ответа: {response.status_code}')
@@ -86,7 +90,8 @@ def get_api_answer(timestamp):
         json_response = response.json()
         if 'code' in json_response or 'error' in json_response:
             error_message = json_response.get('error') or json_response.get('code')
-            raise ex.EndpointAccessError(f'Произошла ошибка при запросе к {ENDPOINT}:'
+            raise ex.EndpointAccessError('Произошла ошибка'
+                                         f'при запросе к {ENDPOINT}:'
                                          f'{error_message}')
         return json_response
     except decoder.JSONDecodeError as error:
@@ -107,20 +112,20 @@ def check_response(response):
     return homeworks
 
 
-def parse_status(homework): 
-    """Получает статус домашней работы.""" 
-    homework_name = homework.get('homework_name') 
-    if 'homework_name' not in homework: 
-        raise KeyError('Ответ API не содержит ключа "homework_name"') 
+def parse_status(homework):
+    """Получает статус домашней работы."""
+    homework_name = homework.get('homework_name')
+    if 'homework_name' not in homework:
+        raise KeyError('Ответ API не содержит ключа "homework_name"')
 
-    homework_status = homework.get('status') 
-    if 'status' not in homework: 
-        raise KeyError('Ответ API не содержит ключа "status"') 
+    homework_status = homework.get('status')
+    if 'status' not in homework:
+        raise KeyError('Ответ API не содержит ключа "status"')
 
-    verdict = HOMEWORK_VERDICTS.get(homework_status) 
-    if verdict is None: 
+    verdict = HOMEWORK_VERDICTS.get(homework_status)
+    if verdict is None:
         raise ValueError(f'Неизвестный статус "{homework_status}"'
-                         f'у работы "{homework_name}"') 
+                         f'у работы "{homework_name}"')
 
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
