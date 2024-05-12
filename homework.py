@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import logging
-from json import decoder
 from http import HTTPStatus
 
 import requests
