@@ -191,5 +191,7 @@ def main():
         send_message(bot, message)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
+    setup_logger() 
+    logging.info("Logger initialized")
     main()
