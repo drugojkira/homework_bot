@@ -179,8 +179,8 @@ def main():
             except Exception as error:
                 message = GENERIC_ERROR_MESSAGE.format(error)
                 logging.error(message)
-                if message != last_message_cache and (send_message
-                                                      (bot, message)):
+                if message != last_message_cache:
+                    send_message(bot, message)
                     last_message_cache = message
 
             time.sleep(RETRY_PERIOD)
