@@ -37,7 +37,8 @@ API_ERROR_MESSAGE = (
     'Произошла ошибка при запросе к {}: {}. Параметры запроса: {}, '
     'Ключ: {}, Значение: {}'
 )
-RESPONSE_NOT_DICT_ERROR = 'Ответ API должен быть представлен в виде словаря, получен тип: {}'
+RESPONSE_NOT_DICT_ERROR = 'Ответ API должен быть представлен в виде словаря,'
+'получен тип: {}'
 KEY_MISSING_ERROR = 'Ответ API не содержит ключа "homeworks"'
 DATA_NOT_LIST_ERROR = (
     'Данные под ключом "homeworks" не являются списком, получен тип: {}'
@@ -46,7 +47,7 @@ MISSING_KEY_ERROR = 'Ответ API не содержит ключа "{}"'
 UNKNOWN_STATUS_ERROR = 'Неизвестный статус "{}" у работы "{}"'
 STATUS_CHANGE_MESSAGE = 'Изменился статус проверки работы "{}". {}'
 MISSING_ENV_VAR_ERROR = (
-    'Отсутствуют обязательные переменные окружения. Программа прекращает работу.'
+    'Отсутствуют обязательные переменные окружения.'
 )
 GENERIC_ERROR_MESSAGE = 'Произошла ошибка: {}'
 
@@ -68,14 +69,15 @@ def setup_logger():
 
     return logger
 
+
 logger = setup_logger()
 
 
 def check_tokens():
-    """Проверяет доступность переменных окружения и бросает исключение при их отсутствии."""
+    """Проверяет доступность переменных окружения и бросает исключение."""
     missing_tokens = [name for name in TOKEN_NAMES if not globals().get(name)]
     if missing_tokens:
-        error_message = MISSING_ENV_VAR_ERROR + f" Отсутствуют: {', '.join(missing_tokens)}"
+        error_message = MISSING_ENV_VAR_ERROR
         logging.critical(error_message)
         raise EnvironmentError(error_message)
 
@@ -123,16 +125,17 @@ def get_api_answer(timestamp):
 def check_response(response):
     """Возвращает список домашних работ."""
     if not isinstance(response, dict):
-        raise TypeError(RESPONSE_NOT_DICT_ERROR.format(type(response).__name__))
-    
+        raise TypeError(RESPONSE_NOT_DICT_ERROR.format
+                        (type(response).__name__))
+
     if 'homeworks' not in response:
         raise KeyError(KEY_MISSING_ERROR)
-    
+
     homeworks = response['homeworks']
-    
+
     if not isinstance(homeworks, list):
         raise TypeError(DATA_NOT_LIST_ERROR.format(type(homeworks).__name__))
-    
+
     return homeworks
 
 
@@ -140,17 +143,17 @@ def parse_status(homework):
     """Получает статус домашней работы."""
     if 'homework_name' not in homework:
         raise KeyError(MISSING_KEY_ERROR.format('homework_name'))
-    
+
     name = homework['homework_name']
-    
+
     if 'status' not in homework:
         raise KeyError(MISSING_KEY_ERROR.format('status'))
-    
+
     status = homework['status']
-    
+
     if status not in HOMEWORK_VERDICTS:
         raise ValueError(UNKNOWN_STATUS_ERROR.format(status, name))
-    
+
     verdict = HOMEWORK_VERDICTS[status]
     return STATUS_CHANGE_MESSAGE.format(name, verdict)
 
@@ -162,12 +165,12 @@ def main():
     try:
         check_tokens()
         bot = TeleBot(token=TELEGRAM_TOKEN)
-        
+
         while True:
             try:
                 response = get_api_answer(last_homework_time)
                 homeworks = check_response(response)
-                
+
                 if homeworks:
                     latest_homework = homeworks[0]
                     message = parse_status(latest_homework)
@@ -176,7 +179,8 @@ def main():
             except Exception as error:
                 message = GENERIC_ERROR_MESSAGE.format(error)
                 logging.error(message)
-                if message != last_message_cache and send_message(bot, message):
+                if message != last_message_cache and (send_message
+                                                      (bot, message)):
                     last_message_cache = message
 
             time.sleep(RETRY_PERIOD)
