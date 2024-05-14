@@ -50,12 +50,15 @@ MISSING_ENV_VAR_ERROR = (
     'Отсутствуют обязательные переменные окружения.'
 )
 GENERIC_ERROR_MESSAGE = 'Произошла ошибка: {}'
+NO_CHANGES_IN_STATUS = 'Статус домашнего задания не изменился'
+ERROR_DURING_OPERATION = 'Ошибка при работе бота: %s'
+CRITICAL_TOKEN_ERROR = 'Критическая ошибка проверки токена: %s'
 
 
 def setup_logger():
     """Установка логгера."""
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
@@ -168,7 +171,7 @@ def main():
     try:
         check_tokens()
     except Exception as error:
-        logger.error("Critical token check error: %s", error)
+        logger.error(CRITICAL_TOKEN_ERROR, error)
         return
 
     while True:
@@ -182,8 +185,11 @@ def main():
                     error_message = send_message(bot, message)
                     if error_message is None:
                         last_message_cache = message
+            else:
+                # Логируем отсутствие изменений, если список домашних работ пуст
+                logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
-            logger.error("Error during bot operation: %s", error)
+            logger.error(ERROR_DURING_OPERATION, error)
             error_message = GENERIC_ERROR_MESSAGE.format(error)
             if error_message != last_message_cache:
                 send_message(bot, error_message)
