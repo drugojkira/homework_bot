@@ -93,6 +93,7 @@ def send_message(bot, message):
         error_message = ERROR_MESSAGE.format(message, e)
         logging.error(error_message, exc_info=True)
         return error_message
+    return None
 
 
 def get_api_answer(timestamp):
@@ -162,9 +163,9 @@ def main():
     """Основная логика работы бота."""
     last_message_cache = ''
     last_homework_time = 0
+    bot = TeleBot(token=TELEGRAM_TOKEN)
     try:
         check_tokens()
-        bot = TeleBot(token=TELEGRAM_TOKEN)
 
         while True:
             try:
@@ -174,16 +175,18 @@ def main():
                 if homeworks:
                     latest_homework = homeworks[0]
                     message = parse_status(latest_homework)
-                    if send_message(bot, message):
-                        last_message_cache = message
+                    if message != last_message_cache:
+                        error = send_message(bot, message)
+                        if error is None:
+                            last_message_cache = message
             except Exception as error:
                 message = GENERIC_ERROR_MESSAGE.format(error)
                 logging.error(message)
                 if message != last_message_cache:
                     send_message(bot, message)
                     last_message_cache = message
-
-            time.sleep(RETRY_PERIOD)
+            finally:
+                time.sleep(RETRY_PERIOD)
 
     except Exception as error:
         message = GENERIC_ERROR_MESSAGE.format(error)
