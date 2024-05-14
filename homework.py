@@ -164,7 +164,7 @@ def main():
     last_message_cache = ''
     last_homework_time = 0
     bot = TeleBot(token=TELEGRAM_TOKEN)
-    
+
     try:
         check_tokens()
     except Exception as error:
@@ -190,6 +190,7 @@ def main():
                 last_message_cache = error_message
         finally:
             time.sleep(RETRY_PERIOD)
+
 
 if __name__ == '__main__':
     setup_logger()
