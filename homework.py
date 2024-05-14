@@ -37,9 +37,11 @@ API_ERROR_MESSAGE = (
     'Произошла ошибка при запросе к {}: {}. Параметры запроса: {}, '
     'Ключ: {}, Значение: {}'
 )
-RESPONSE_NOT_DICT_ERROR = 'Ответ API должен быть представлен в виде словаря, получен тип: {}'
+RESPONSE_NOT_DICT_ERROR = 'Ответ API должен быть представлен в виде словаря,'
+'получен тип: {}'
 KEY_MISSING_ERROR = 'Ответ API не содержит ключа "homeworks"'
-DATA_NOT_LIST_ERROR = 'Данные под ключом "homeworks" не являются списком, получен тип: {}'
+DATA_NOT_LIST_ERROR = 'Данные под ключом "homeworks" не являются списком,'
+'получен тип: {}'
 MISSING_KEY_ERROR = 'Ответ API не содержит ключа "{}"'
 UNKNOWN_STATUS_ERROR = 'Неизвестный статус "{}" у работы "{}"'
 STATUS_CHANGE_MESSAGE = 'Изменился статус проверки работы "{}". {}'
@@ -95,6 +97,7 @@ def send_message(bot, message):
 
 class ApiError(Exception):
     """Custom exception to handle API errors."""
+
     pass
 
 
@@ -131,7 +134,9 @@ def get_api_answer(timestamp):
 def check_response(response):
     """Возвращает список домашних работ."""
     if not isinstance(response, dict):
-        raise TypeError(RESPONSE_NOT_DICT_ERROR.format(type(response).__name__))
+        raise TypeError(RESPONSE_NOT_DICT_ERROR.format(
+            type(response).__name__
+            ))
     if 'homeworks' not in response:
         raise KeyError(KEY_MISSING_ERROR)
     homeworks = response['homeworks']
