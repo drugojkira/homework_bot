@@ -49,6 +49,7 @@ NO_CHANGES_IN_STATUS = 'Статус домашнего задания не из
 ERROR_DURING_OPERATION = 'Ошибка при работе бота:'
 CRITICAL_TOKEN_ERROR = 'Критическая ошибка проверки токена:'
 
+
 def setup_logger():
     """Установка логгера."""
     logger = logging.getLogger(__name__)
@@ -66,7 +67,9 @@ def setup_logger():
 
     return logger
 
+
 logger = setup_logger()
+
 
 def check_tokens():
     """Проверяет доступность переменных окружения и бросает исключение."""
@@ -75,6 +78,7 @@ def check_tokens():
         error_message = MISSING_ENV_VAR_ERROR
         logger.critical(error_message)
         raise EnvironmentError(error_message)
+
 
 def send_message(bot, message):
     """Отправляет сообщение через бота в Telegram."""
@@ -88,9 +92,11 @@ def send_message(bot, message):
         logger.error(error_message, exc_info=True)
         return False
 
+
 class ApiError(Exception):
     """Custom exception to handle API errors."""
     pass
+
 
 def get_api_answer(timestamp):
     """Делает запрос к API ЯндексПрактикум."""
@@ -100,13 +106,13 @@ def get_api_answer(timestamp):
     except requests.exceptions.RequestException as error:
         error_message = REQUEST_ERROR_MESSAGE.format(
             ENDPOINT, params, error
-            )
+        )
         logger.error(error_message)
         raise ApiError(error_message)
     if response.status_code != HTTPStatus.OK:
         error_message = RESPONSE_STATUS_ERROR_MESSAGE.format(
             ENDPOINT, params, response.status_code
-            )
+        )
         logger.error(error_message)
         raise ApiError(error_message)
 
@@ -121,6 +127,7 @@ def get_api_answer(timestamp):
             raise ApiError(error_message)
     return json_response
 
+
 def check_response(response):
     """Возвращает список домашних работ."""
     if not isinstance(response, dict):
@@ -131,6 +138,7 @@ def check_response(response):
     if not isinstance(homeworks, list):
         raise TypeError(DATA_NOT_LIST_ERROR.format(type(homeworks).__name__))
     return homeworks
+
 
 def parse_status(homework):
     """Получает статус домашней работы."""
@@ -144,6 +152,7 @@ def parse_status(homework):
         raise ValueError(UNKNOWN_STATUS_ERROR.format(status, name))
     verdict = HOMEWORK_VERDICTS[status]
     return STATUS_CHANGE_MESSAGE.format(name, verdict)
+
 
 def main():
     """Основная логика работы бота."""
@@ -174,6 +183,7 @@ def main():
                 last_message_cache = error_message
         finally:
             time.sleep(RETRY_PERIOD)
+
 
 if __name__ == '__main__':
     main()
