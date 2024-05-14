@@ -135,8 +135,8 @@ def check_response(response):
     """Возвращает список домашних работ."""
     if not isinstance(response, dict):
         raise TypeError(RESPONSE_NOT_DICT_ERROR.format(
-            type(response).__name__
-            ))
+    type(response).__name__)
+)
     if 'homeworks' not in response:
         raise KeyError(KEY_MISSING_ERROR)
     homeworks = response['homeworks']
