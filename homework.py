@@ -164,37 +164,34 @@ def main():
     last_message_cache = ''
     last_homework_time = 0
     bot = TeleBot(token=TELEGRAM_TOKEN)
+    
     try:
         check_tokens()
-
-        while True:
-            try:
-                response = get_api_answer(last_homework_time)
-                homeworks = check_response(response)
-
-                if homeworks:
-                    latest_homework = homeworks[0]
-                    message = parse_status(latest_homework)
-                    if message != last_message_cache:
-                        error = send_message(bot, message)
-                        if error is None:
-                            last_message_cache = message
-            except Exception as error:
-                message = GENERIC_ERROR_MESSAGE.format(error)
-                logging.error(message)
-                if message != last_message_cache:
-                    send_message(bot, message)
-                    last_message_cache = message
-            finally:
-                time.sleep(RETRY_PERIOD)
-
     except Exception as error:
-        message = GENERIC_ERROR_MESSAGE.format(error)
-        logging.error(message)
-        send_message(bot, message)
+        logger.error("Critical token check error: %s", error)
+        return
 
+    while True:
+        try:
+            response = get_api_answer(last_homework_time)
+            homeworks = check_response(response)
+            if homeworks:
+                latest_homework = homeworks[0]
+                message = parse_status(latest_homework)
+                if message != last_message_cache:
+                    error_message = send_message(bot, message)
+                    if error_message is None:
+                        last_message_cache = message
+        except Exception as error:
+            logger.error("Error during bot operation: %s", error)
+            error_message = GENERIC_ERROR_MESSAGE.format(error)
+            if error_message != last_message_cache:
+                send_message(bot, error_message)
+                last_message_cache = error_message
+        finally:
+            time.sleep(RETRY_PERIOD)
 
 if __name__ == '__main__':
     setup_logger()
-    logging.info("Logger initialized")
+    logger.info("Logger initialized")
     main()
