@@ -186,7 +186,7 @@ def main():
                     if error_message is None:
                         last_message_cache = message
             else:
-                # Логируем отсутствие изменений, если список домашних работ пуст
+                # Логируем отсутствие изменений
                 logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
             logger.error(ERROR_DURING_OPERATION, error)
