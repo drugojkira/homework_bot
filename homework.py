@@ -166,21 +166,18 @@ def main():
             if homeworks:
                 latest_homework = homeworks[0]
                 message = parse_status(latest_homework)
-                if message != last_message_cache and send_message(
-                    bot, message
-                    ):
+                if (message != last_message_cache and
+                        send_message(bot, message)):
                     last_message_cache = message
                 last_homework_time = latest_homework.get(
-                    'date', last_homework_time
-                    )
+                    'date', last_homework_time)
             else:
                 logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
             error_message = GENERIC_ERROR_MESSAGE.format(error)
             logger.error(error_message)
-            if error_message != last_message_cache and send_message(
-                bot, error_message
-                ):
+            if (error_message != last_message_cache and
+                    send_message(bot, error_message)):
                 last_message_cache = error_message
         finally:
             time.sleep(RETRY_PERIOD)
