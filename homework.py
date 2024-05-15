@@ -39,7 +39,7 @@ API_ERROR_MESSAGE = (
 )
 RESPONSE_NOT_DICT = 'Ответ API должен быть представлен в виде словаря,'
 'получен тип: {}'
-KEY_MISSING_ERROR = 'Ответ API не содержит ключа "homeworks"'
+HOMEWORKS_KEY_MISSING_ERROR = 'Ответ API не содержит ключа "homeworks"'
 DATA_NOT_LIST_ERROR = 'Данные под ключом "homeworks" не являются списком,'
 'получен тип: {}'
 MISSING_KEY_ERROR = 'Ответ API не содержит ключа "{}"'
@@ -106,37 +106,32 @@ def get_api_answer(timestamp):
     params = {'from_date': timestamp}
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
+        response.raise_for_status()
     except requests.exceptions.RequestException as error:
-        error_message = REQUEST_ERROR_MESSAGE.format(
-            ENDPOINT, params, error
-        )
-        logger.error(error_message)
-        raise ApiError(error_message)
+        raise ApiError(REQUEST_ERROR_MESSAGE.format(
+            ENDPOINT, params, error, response.request.url, response.request.body
+        ))
     if response.status_code != HTTPStatus.OK:
-        error_message = RESPONSE_STATUS_ERROR_MESSAGE.format(
-            ENDPOINT, params, response.status_code
-        )
-        logger.error(error_message)
-        raise ApiError(error_message)
+        raise ApiError(RESPONSE_STATUS_ERROR_MESSAGE.format(
+            ENDPOINT, params, response.status_code, response.reason
+        ))
 
     json_response = response.json()
     for key in ['code', 'error']:
         if key in json_response:
-            error_value = json_response.get(key)
-            error_message = API_ERROR_MESSAGE.format(
-                ENDPOINT, error_value, params, key, error_value
-            )
-            logger.error(error_message)
-            raise ApiError(error_message)
+            raise ApiError(API_ERROR_MESSAGE.format(
+                ENDPOINT, json_response.get(key), params, key,
+                json_response.get(key)
+            ))
     return json_response
 
 
 def check_response(response):
-    """Возвращает список домашних работ."""
+    """Проверяет корректность API и возвращает список домашних работ."""
     if not isinstance(response, dict):
         raise TypeError(RESPONSE_NOT_DICT.format(type(response).__name__))
     if 'homeworks' not in response:
-        raise KeyError(KEY_MISSING_ERROR)
+        raise KeyError(HOMEWORKS_KEY_MISSING_ERROR)
     homeworks = response['homeworks']
     if not isinstance(homeworks, list):
         raise TypeError(DATA_NOT_LIST_ERROR.format(type(homeworks).__name__))
@@ -171,18 +166,19 @@ def main():
             if homeworks:
                 latest_homework = homeworks[0]
                 message = parse_status(latest_homework)
-                if message != last_message_cache:
-                    if send_message(bot, message):
-                        last_message_cache = message
-                last_homework_time = int(time.time())
+                if message != last_message_cache and send_message(bot, message):
+                    last_message_cache = message
+                last_homework_time = latest_homework.get(
+                    'date', last_homework_time
+                    )
             else:
-                # Логируем отсутствие изменений
                 logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
-            logger.error(f'{ERROR_DURING_OPERATION} {error}')
             error_message = GENERIC_ERROR_MESSAGE.format(error)
-            if error_message != last_message_cache:
-                send_message(bot, error_message)
+            logger.error(error_message)
+            if error_message != last_message_cache and send_message(
+                bot, error_message
+                ):
                 last_message_cache = error_message
         finally:
             time.sleep(RETRY_PERIOD)
