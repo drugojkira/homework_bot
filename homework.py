@@ -37,11 +37,13 @@ API_ERROR_MESSAGE = (
     'Произошла ошибка при запросе к {}: {}. Параметры запроса: {}, '
     'Ключ: {}, Значение: {}'
 )
-RESPONSE_NOT_DICT = 'Ответ API должен быть представлен в виде словаря,'
-'получен тип: {}'
+RESPONSE_NOT_DICT = (
+    'Ответ API должен быть представлен в виде словаря, получен тип: {}'
+)
 HOMEWORKS_KEY_MISSING_ERROR = 'Ответ API не содержит ключа "homeworks"'
-DATA_NOT_LIST_ERROR = 'Данные под ключом "homeworks" не являются списком,'
-'получен тип: {}'
+DATA_NOT_LIST_ERROR = (
+    'Данные под ключом "homeworks" не являются списком, получен тип: {}'
+)
 MISSING_KEY_ERROR = 'Ответ API не содержит ключа "{}"'
 UNKNOWN_STATUS_ERROR = 'Неизвестный статус "{}" у работы "{}"'
 STATUS_CHANGE_MESSAGE = 'Изменился статус проверки работы "{}". {}'
@@ -109,7 +111,8 @@ def get_api_answer(timestamp):
         response.raise_for_status()
     except requests.exceptions.RequestException as error:
         raise ApiError(REQUEST_ERROR_MESSAGE.format(
-            ENDPOINT, params, error, response.request.url, response.request.body
+            ENDPOINT, params, error, response.request.url,
+            response.request.body
         ))
     if response.status_code != HTTPStatus.OK:
         raise ApiError(RESPONSE_STATUS_ERROR_MESSAGE.format(
@@ -166,18 +169,23 @@ def main():
             if homeworks:
                 latest_homework = homeworks[0]
                 message = parse_status(latest_homework)
-                if (message != last_message_cache and
-                        send_message(bot, message)):
+                if (
+                    message != last_message_cache
+                    and send_message(bot, message)
+                ):
                     last_message_cache = message
                 last_homework_time = latest_homework.get(
-                    'date', last_homework_time)
+                    'date', last_homework_time
+                )
             else:
                 logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
             error_message = GENERIC_ERROR_MESSAGE.format(error)
             logger.error(error_message)
-            if (error_message != last_message_cache and
-                    send_message(bot, error_message)):
+            if (
+                error_message != last_message_cache
+                and send_message(bot, error_message)
+            ):
                 last_message_cache = error_message
         finally:
             time.sleep(RETRY_PERIOD)
@@ -185,3 +193,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
