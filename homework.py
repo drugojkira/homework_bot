@@ -61,7 +61,8 @@ def setup_logger():
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-    file_handler = logging.FileHandler('logfile.log')
+    log_file_path = os.path.join(os.path.dirname(__file__), 'logfile.log')
+    file_handler = logging.FileHandler(log_file_path)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
@@ -108,15 +109,14 @@ def get_api_answer(timestamp):
     params = {'from_date': timestamp}
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
-        response.raise_for_status()
     except requests.exceptions.RequestException as error:
         raise ApiError(REQUEST_ERROR_MESSAGE.format(
-            ENDPOINT, params, error, response.request.url,
-            response.request.body
+            ENDPOINT, params, error, 'N/A', 'N/A'
         ))
     if response.status_code != HTTPStatus.OK:
         raise ApiError(RESPONSE_STATUS_ERROR_MESSAGE.format(
-            ENDPOINT, params, response.status_code, response.reason
+            ENDPOINT, params, response.status_code, response.reason,
+            response.url, response.request.body
         ))
 
     json_response = response.json()
@@ -124,7 +124,7 @@ def get_api_answer(timestamp):
         if key in json_response:
             raise ApiError(API_ERROR_MESSAGE.format(
                 ENDPOINT, json_response.get(key), params, key,
-                json_response.get(key)
+                json_response.get(key), response.url, response.request.body
             ))
     return json_response
 
@@ -174,8 +174,8 @@ def main():
                     and send_message(bot, message)
                 ):
                     last_message_cache = message
-                last_homework_time = latest_homework.get(
-                    'date', last_homework_time
+                last_homework_time = response.get(
+                    'current_date', last_homework_time
                 )
             else:
                 logger.debug(NO_CHANGES_IN_STATUS)
