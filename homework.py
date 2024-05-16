@@ -109,14 +109,14 @@ def get_api_answer(timestamp):
     params = {'from_date': timestamp}
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
+        response.raise_for_status()
     except requests.exceptions.RequestException as error:
         raise ApiError(REQUEST_ERROR_MESSAGE.format(
-            ENDPOINT, params, error, 'N/A', 'N/A'
+            ENDPOINT, params, error
         ))
     if response.status_code != HTTPStatus.OK:
         raise ApiError(RESPONSE_STATUS_ERROR_MESSAGE.format(
-            ENDPOINT, params, response.status_code, response.reason,
-            response.url, response.request.body
+            ENDPOINT, params, response.status_code, response.reason
         ))
 
     json_response = response.json()
@@ -124,7 +124,7 @@ def get_api_answer(timestamp):
         if key in json_response:
             raise ApiError(API_ERROR_MESSAGE.format(
                 ENDPOINT, json_response.get(key), params, key,
-                json_response.get(key), response.url, response.request.body
+                json_response.get(key)
             ))
     return json_response
 
@@ -151,8 +151,7 @@ def parse_status(homework):
     status = homework['status']
     if status not in HOMEWORK_VERDICTS:
         raise ValueError(UNKNOWN_STATUS_ERROR.format(status, name))
-    verdict = HOMEWORK_VERDICTS[status]
-    return STATUS_CHANGE_MESSAGE.format(name, verdict)
+    return STATUS_CHANGE_MESSAGE.format(name, HOMEWORK_VERDICTS[status])
 
 
 def main():
