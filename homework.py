@@ -116,9 +116,9 @@ def get_api_answer(timestamp):
     if response.status_code != HTTPStatus.OK:
         raise requests.exceptions.RequestException(
             RESPONSE_STATUS_ERROR_MESSAGE.format(
-            ENDPOINT, HEADERS, params, response.status_code,
-            response.reason
-        ))
+                ENDPOINT, HEADERS, params, response.status_code,
+                response.reason
+            ))
 
     json_response = response.json()
     for key in ['code', 'error']:
@@ -175,7 +175,7 @@ def main():
                     last_message_cache = message
                     last_homework_time = response.get(
                         'current_date', last_homework_time
-                        )
+                    )
             else:
                 logger.debug(NO_CHANGES_IN_STATUS)
         except Exception as error:
